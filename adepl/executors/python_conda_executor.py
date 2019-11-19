@@ -1,12 +1,14 @@
+import os
 from time import sleep
 from typing import List
 
+from adepl.code_providers.project_base import ProjectBase
 from adepl.executors.executor_base import ExecutorBase
 from adepl.executors.process_proxy import ProcessProxy
 
 
 class PythonCondaExecutor(ExecutorBase):
-    def __init__(self, env: str, working_directory: str, start_module: str, extra_code_dependencies: List = None,
+    def __init__(self, env: str, start_module: str, extra_code_dependencies: List = None,
                  package_dependencies: List = None, **kwargs):
         super().__init__(**kwargs)
 
@@ -14,19 +16,23 @@ class PythonCondaExecutor(ExecutorBase):
         self._package_dependencies = list(package_dependencies or [])
 
         self._env = env
-        self._working_directory = working_directory
         self._start_module = start_module
 
         self._process_proxy = ProcessProxy()
 
     def _executor(self):
-        while True:
+        while not self.is_stopped:
             # TODO handle package dependencies
             # TODO handle conda envs
+            env = os.environ.copy()
+            if self._extra_code_dependencies:
+                env["PYTHONPATH"] = ":".join(d.root for d in self._extra_code_dependencies)
+
             execution_command = f"python -m {self._start_module}"
             self._process_proxy.start(
-                execution_command, cwd=self._working_directory,
-                stdout=self._stdout_reader, stderr=self._stderr_reader
+                execution_command, cwd=self._project.working_directory,
+                stdout=self._stdout_reader, stderr=self._stderr_reader,
+                env=env
             )
             self._process_proxy.wait()
             sleep(1)  # prevent rapid spinning
@@ -34,10 +40,10 @@ class PythonCondaExecutor(ExecutorBase):
     def _restart(self):
         self._process_proxy.kill()
 
-    def _stdout_reader(self, data):
+    def _stdout_reader(self, line):
         self._trigger("stdout", {
             "owner": self,
-            "line": data
+            "line": line
         })
 
     def _stderr_reader(self, line):
@@ -45,3 +51,8 @@ class PythonCondaExecutor(ExecutorBase):
             "owner": self,
             "line": line
         })
+
+    def _on_stop(self):
+        super()._on_stop()
+
+        self._process_proxy.kill()

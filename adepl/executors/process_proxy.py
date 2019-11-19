@@ -6,9 +6,9 @@ from threading import Thread, RLock, Event
 
 
 class ProcessProxy(object):
-    def start(self, cmd, cwd=None, stdout=None, stderr=None):
+    def start(self, cmd, cwd=None, stdout=None, stderr=None, env=None):
         self._p = subprocess.Popen(cmd, shell=True, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                   preexec_fn=os.setsid)
+                                   preexec_fn=os.setsid, env=env)
         self._stdout = stdout
         self._stderr = stderr
         self._queue = Queue()
