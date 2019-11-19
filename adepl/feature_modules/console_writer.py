@@ -1,4 +1,5 @@
 import os
+import time
 
 from adepl.deployment.event_bus_reader_base import EventBusReaderBase
 
@@ -15,7 +16,7 @@ class ConsoleWriter(EventBusReaderBase):
     def _write_data(self, device, data):
         file_path = os.path.join("/tmp", "adepl", "console_writer", self._owner.name, data["owner"].name, "console.txt")
         file = self._get_file(file_path)
-        line = f"[{device}] {data['line']} \n"
+        line = f"[{device} - {time.time()}] {data['line']} \n"
         file.write(line)
         file.flush()
 
