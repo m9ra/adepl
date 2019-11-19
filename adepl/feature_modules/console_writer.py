@@ -24,7 +24,7 @@ class ConsoleWriter(EventBusReaderBase):
             dirname = os.path.dirname(path)
             os.makedirs(dirname, exist_ok=True)
 
-            self._open_files[path] = open(path, "w")
+            self._open_files[path] = open(path, "w", buffering=1)  # line buffered file
 
         return self._open_files[path]
 
