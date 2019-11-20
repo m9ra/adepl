@@ -16,7 +16,12 @@ class ConsoleWriter(EventBusReaderBase):
     def _write_data(self, device, data):
         file_path = os.path.join("/tmp", "adepl", "console_writer", self._owner.name, data["owner"].name, "console.txt")
         file = self._get_file(file_path)
-        line = f"[{device} - {time.time()}] {data['line']} \n"
+        if device == "STDOUT":
+            device = "OUT"
+        elif device == "STDERR":
+            device = "ERR"
+
+        line = f"[{device} {time.strftime('%Y-%m-%d %H:%M:%S')}] {data['line']} \n"
         file.write(line)
         file.flush()
 
