@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block title %}Adepl - Console{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <h1>{{executor_name}}</h1>
+    </div>
+
+
+    <div class="row"
+         style="color: white; font: 1.3rem Inconsolata, monospace;font-size:17px;background: black;line-height:1.42857143">
+        <div class="col" id="console" style="height:80vh;overflow-y: scroll; overflow-x: hidden">
+        </div>
+    </div>
+
+</div>
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"
+        integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<script>
+
+    var consoleOutput = document.getElementById("console");
+
+    function consoleWrite(html) {
+        var isStickToBottom = consoleOutput.scrollHeight - consoleOutput.clientHeight <= consoleOutput.scrollTop + 1;
+        consoleOutput.innerHTML += html;
+
+        if (isStickToBottom) {
+            consoleOutput.scrollTop = consoleOutput.scrollHeight - consoleOutput.clientHeight;
+        }
+    }
+
+    var socket = io("/", {secure: "https:" == location.protocol});
+    console.log("socket");
+
+    socket.on("console_data", function (data) {
+        text = data["text"];
+        text = text.replace(/\n/g, "<br/>");
+        consoleWrite(text);
+    });
+
+    socket.on("console_reset", function (data) {
+        consoleWrite("<br/>==========CONSOLE RESET======<br/>")
+    });
+
+    // register handlers
+    socket.on("connect", function () {
+        console.log("connect");
+        socket.emit("subscribe_console", {
+            "solution_name": "{{solution_name}}",
+            "executor_name": "{{executor_name}}"
+        });
+    });
+
+</script>
+{% endblock %}

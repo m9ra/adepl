@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}Adepl - Executors{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <h1>Executor list</h1>
+    </div>
+
+
+    {% for executor_name in executor_names %}
+    <div class="row">
+        <div class="col">
+            <a href="/console/{{solution_name}}/{{executor_name}}">{{executor_name}}</a>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

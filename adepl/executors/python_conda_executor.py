@@ -28,7 +28,7 @@ class PythonCondaExecutor(ExecutorBase):
             if self._extra_code_dependencies:
                 env["PYTHONPATH"] = ":".join(d.root for d in self._extra_code_dependencies)
 
-            execution_command = f"python -m {self._start_module}"
+            execution_command = f"python -u -m {self._start_module}"
             self._process_proxy.start(
                 execution_command, cwd=self._project.working_directory,
                 stdout=self._stdout_reader, stderr=self._stderr_reader,

@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}Adepl{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <h1>Solution list</h1>
+    </div>
+
+
+    {% for solution_name in solution_names %}
+    <div class="row">
+        <div class="col">
+            <a href="/solution/{{solution_name}}">{{solution_name}}</a>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}
