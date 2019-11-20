@@ -37,7 +37,7 @@
 
     socket.on("console_data", function (data) {
         text = data["text"];
-        text = text.replace(/\n/g, "<br/>");
+        text = text.replace(/\n/g, "<br/>").replace(/\t/g, "&emsp;").replace(/  /g, "&nbsp;&nbsp;");
         consoleWrite(text);
     });
 
