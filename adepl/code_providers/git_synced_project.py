@@ -47,7 +47,7 @@ class GitSyncedProject(ProjectBase):
         })
 
         if line is not None:
-            has_change = "files changed" in line
+            has_change = "files changed" in line or "file changed" in line
             self._change_registered = self._change_registered or has_change
 
     def _stderr_handler(self, line):
