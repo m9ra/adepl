@@ -26,7 +26,7 @@ class ConsoleMerger(EventBusReaderBase):
 
         new_payload = dict(data)
         new_payload["owner"] = self
-        new_payload["line"] = "[" + data["owner"].name + "] " + data["line"]
+        new_payload["line"] = f"{data['owner'].name} {data['line']}"
 
         self._trigger(event_name, new_payload)
 
