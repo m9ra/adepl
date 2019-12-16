@@ -57,6 +57,14 @@ def console(solution_name, executor_name):
     return render_template("console.html", solution_name=solution_name, executor_name=executor_name)
 
 
+@socketio.on('disconnect')
+def client_disconnected():
+    sid = request.sid
+    if sid in SID_TO_STREAMED_FILES:
+        SID_TO_STREAMED_FILES[sid].close()
+        SID_TO_STREAMED_FILES[sid] = None
+
+
 @socketio.on('subscribe_console')
 def client_connected(json):
     solution_name = json["solution_name"]
