@@ -2,6 +2,7 @@ import os
 import time
 
 from adepl.deployment.event_bus_reader_base import EventBusReaderBase
+from adepl.utils.rotary_files.writer import Writer
 
 
 class ConsoleWriter(EventBusReaderBase):
@@ -27,10 +28,8 @@ class ConsoleWriter(EventBusReaderBase):
 
     def _get_file(self, path):
         if not path in self._open_files:
-            dirname = os.path.dirname(path)
-            os.makedirs(dirname, exist_ok=True)
-
-            self._open_files[path] = open(path, "w", buffering=1)  # line buffered file
+            writer = Writer(path, 10 * 1024)
+            self._open_files[path] = writer
 
         return self._open_files[path]
 

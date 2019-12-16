@@ -18,12 +18,16 @@ class ProcessProxy(object):
         self._start_pipe_thread(self._p.stderr)
         Thread(target=self._process_reader, daemon=True).start()
 
-    def wait(self):
-        self._finish_event.wait()
+    def wait(self, timeout=None):
+        self._finish_event.wait(timeout)
 
-    def kill(self):
+    def kill(self, fast=False):
         if self._p is None:
             return
+
+        if not fast:
+            os.killpg(self._p.pid, signal.SIGTERM)
+            self.wait(2.0)
 
         os.killpg(self._p.pid, signal.SIGKILL)
         self.wait()

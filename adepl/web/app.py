@@ -1,10 +1,12 @@
 import os
 from threading import Thread
-from time import sleep
+from typing import Dict
 
-from flask import Flask, render_template, make_response, request
+from flask import Flask, render_template, request
 from flask_bootstrap import Bootstrap
 from flask_socketio import SocketIO
+
+from adepl.utils.rotary_files.reader import Reader
 
 HTTP_PORT = 7895
 ADEPL_DIR = "/tmp/adepl"
@@ -20,6 +22,8 @@ app.secret_key = b'effer234\n\xec]/'
 Bootstrap(app)
 
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+
+SID_TO_STREAMED_FILES: Dict[str, Reader] = {}  # files that are streamed through socket
 
 
 @app.route("/")
@@ -59,42 +63,19 @@ def client_connected(json):
     executor_name = json["executor_name"]
 
     file_path = os.path.join(ADEPL_DIR, "console_writer", solution_name, executor_name, "console.txt")
-    stream_file(file_path, request.sid)
 
+    reader = Reader(file_path)
+    sid = request.sid
 
-def stream_file(file_path, sid):
-    # todo move to some utility class
-    def _stream_file():
-        # todo use some more reasonable eventing - reopening files is ugly, but it solves file recreation
-        with open(file_path, "r", buffering=1) as f:
-            # seek somewhere close to file end
-            f.seek(0, os.SEEK_END)
-            f.seek(max(0, f.tell() - 5000), os.SEEK_SET)  # this hack is needed due to text read mode
-            f.readline()  # align to next line start
-            current_position = f.tell()
+    if sid in SID_TO_STREAMED_FILES:
+        SID_TO_STREAMED_FILES[sid].close()
 
-        while True:
-            with open(file_path, "r", buffering=1, encoding="utf8") as f:
-                f.seek(0, os.SEEK_END)
+    SID_TO_STREAMED_FILES[sid] = reader
 
-                if f.tell() < current_position:
-                    socketio.emit("console_reset", {}, room=sid)
-                    current_position = 0
-                    continue
+    def send_data(data: bytes):
+        socketio.emit("console_data", {"text": data.decode('utf8')}, room=sid)
 
-                f.seek(current_position, os.SEEK_SET)
-
-                next_data = f.read()
-                current_position = f.tell()
-
-                if next_data:
-                    socketio.emit("console_data", {"text": next_data}, room=sid)
-
-                sleep(0.5)
-
-    th = Thread(target=_stream_file)
-    th.daemon = True
-    th.start()
+    reader.subscribe(send_data)
 
 
 if __name__ == "__main__":
