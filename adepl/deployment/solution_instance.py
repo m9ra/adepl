@@ -1,7 +1,7 @@
 import traceback
 from queue import Queue
 from threading import Thread
-from typing import List, Optional
+from typing import List, Optional, Iterable
 
 from adepl.deployment.event_bus_reader_base import EventBusReaderBase
 from adepl.executors.executor_base import ExecutorBase
@@ -33,6 +33,10 @@ class SolutionInstance(object):
 
     def stop(self):
         self.trigger(EventBusReaderBase.solution_stop_event, self)
+
+    def add_plugins(self, *plugins: EventBusReaderBase):
+        for plugin in plugins:
+            plugin.start(self)
 
     def subscribe(self, reader: EventBusReaderBase):
         self._event_bus_readers.append(reader)

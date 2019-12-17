@@ -7,11 +7,10 @@ from adepl.loaders.hard_coded_loader import HardCodedLoader
 loader = HardCodedLoader()
 solutions = list(loader.load_solution_instances())
 for solution in solutions:
-    writer = ConsoleWriter()
-    writer.start(solution)  # todo add call for plugins
-
-    merger = ConsoleMerger("^worker.*", "merged_workers")
-    merger.start(solution)  # todo add call for plugins
+    solution.add_plugins(
+        ConsoleWriter(),
+        ConsoleMerger("^worker.*", "merged_workers")
+    )
 
     solution.start()
     print(f"Solution {solution.name} started")

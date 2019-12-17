@@ -1,8 +1,12 @@
 import os
 import time
 
+from adepl import ADEPL_RUNTIME_DIR
 from adepl.deployment.event_bus_reader_base import EventBusReaderBase
+from adepl.utils.rotary_files.reader import Reader
 from adepl.utils.rotary_files.writer import Writer
+
+CONSOLE_ROTARY_FILE_NAME = "console.txt"
 
 
 class ConsoleWriter(EventBusReaderBase):
@@ -14,8 +18,15 @@ class ConsoleWriter(EventBusReaderBase):
         self._set_event_handler("stdout", lambda d: self._write_data("STDOUT", d))
         self._set_event_handler("stderr", lambda d: self._write_data("STDERR", d))
 
+    @classmethod
+    def create_reader(cls, solution_name, executor_name) -> Reader:
+        file_path = os.path.join(ADEPL_RUNTIME_DIR, solution_name, executor_name, CONSOLE_ROTARY_FILE_NAME)
+        reader = Reader(file_path)
+
+        return reader
+
     def _write_data(self, device, data):
-        file_path = os.path.join("/tmp", "adepl", "console_writer", self._owner.name, data["owner"].name, "console.txt")
+        file_path = os.path.join(ADEPL_RUNTIME_DIR, self._owner.name, data["owner"].name, CONSOLE_ROTARY_FILE_NAME)
         file = self._get_file(file_path)
         if device == "STDOUT":
             device = "OUT"
