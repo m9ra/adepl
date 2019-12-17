@@ -2,7 +2,8 @@ import os
 import time
 
 from adepl import ADEPL_RUNTIME_DIR
-from adepl.deployment.event_bus_reader_base import EventBusReaderBase
+from adepl.core import EVENT
+from adepl.core.event_bus_reader_base import EventBusReaderBase
 from adepl.utils.rotary_files.reader import Reader
 from adepl.utils.rotary_files.writer import Writer
 
@@ -15,8 +16,8 @@ class ConsoleWriter(EventBusReaderBase):
 
         self._open_files = {}
 
-        self._set_event_handler("stdout", lambda d: self._write_data("STDOUT", d))
-        self._set_event_handler("stderr", lambda d: self._write_data("STDERR", d))
+        self._set_event_handler(EVENT.STDOUT, self._write_data)
+        self._set_event_handler(EVENT.STDERR, self._write_data)
 
     @classmethod
     def create_reader(cls, solution_name, executor_name) -> Reader:
@@ -25,12 +26,14 @@ class ConsoleWriter(EventBusReaderBase):
 
         return reader
 
-    def _write_data(self, device, data):
+    def _write_data(self, data):
         file_path = os.path.join(ADEPL_RUNTIME_DIR, self._owner.name, data["owner"].name, CONSOLE_ROTARY_FILE_NAME)
         file = self._get_file(file_path)
-        if device == "STDOUT":
+
+        device = data["name"]
+        if device == EVENT.STDOUT:
             device = "OUT"
-        elif device == "STDERR":
+        elif device == EVENT.STDERR:
             device = "ERR"
 
         line = f"[{device} {time.strftime('%Y-%m-%d %H:%M:%S')}] {data['line']} \n"

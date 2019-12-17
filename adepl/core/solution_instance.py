@@ -1,9 +1,10 @@
 import traceback
 from queue import Queue
 from threading import Thread
-from typing import List, Optional, Iterable
+from typing import List, Optional, Any
 
-from adepl.deployment.event_bus_reader_base import EventBusReaderBase
+from adepl.core import EVENT
+from adepl.core.event_bus_reader_base import EventBusReaderBase
 from adepl.executors.executor_base import ExecutorBase
 
 
@@ -32,7 +33,7 @@ class SolutionInstance(object):
         self._solution_worker_thread.start()
 
     def stop(self):
-        self.trigger(EventBusReaderBase.solution_stop_event, self)
+        self.trigger(EVENT.SOLUTION_STOPPED, self)
 
     def add_plugins(self, *plugins: EventBusReaderBase):
         for plugin in plugins:
@@ -41,8 +42,16 @@ class SolutionInstance(object):
     def subscribe(self, reader: EventBusReaderBase):
         self._event_bus_readers.append(reader)
 
-    def trigger(self, event_name, event_args):
-        self._event_bus_input.put((event_name, event_args))
+    def trigger(self, event_name: str, owner: Any, event_args: dict = None):
+        event = {
+            "name": event_name,
+            "owner": owner
+        }
+
+        if event_args is not None:
+            event.update(event_args)
+
+        self._event_bus_input.put(event)
 
     def _solution_worker(self):
         # TODO collect processing logs
@@ -62,11 +71,11 @@ class SolutionInstance(object):
 
             for reader in self._event_bus_readers:
                 try:
-                    reader.receive(*event)
+                    reader.receive(event)
                 except:
                     traceback.print_exc()
                     # todo log this
 
-            if event[0] == EventBusReaderBase.solution_stop_event:
+            if event["name"] == EVENT.SOLUTION_STOPPED:
                 print("Solution stopped")
                 return

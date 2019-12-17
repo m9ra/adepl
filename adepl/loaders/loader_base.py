@@ -1,6 +1,6 @@
 from typing import List
 
-from adepl.deployment.solution_instance import SolutionInstance
+from adepl.core.solution_instance import SolutionInstance
 
 
 class LoaderBase(object):

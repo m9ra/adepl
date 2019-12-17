@@ -1,7 +1,9 @@
 from threading import Thread
 from typing import Dict, Optional
 
-from adepl.deployment.event_bus_reader_base import EventBusReaderBase
+from adepl.core import EVENT
+from adepl.core.event_bus_reader_base import EventBusReaderBase
+
 
 
 class ProjectBase(EventBusReaderBase):
@@ -39,7 +41,7 @@ class ProjectBase(EventBusReaderBase):
         self._project_worker_thread.start()
 
     def _report_change(self):
-        self._trigger(EventBusReaderBase.project_change, self)
+        self._trigger(EVENT.PROJECT_CHANGED)
 
     def _on_stop(self):
         pass  # nothing to do by default

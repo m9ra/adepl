@@ -2,7 +2,7 @@ import os
 import re
 import time
 
-from adepl.deployment.event_bus_reader_base import EventBusReaderBase
+from adepl.core.event_bus_reader_base import EventBusReaderBase
 
 
 class ConsoleMerger(EventBusReaderBase):
@@ -25,7 +25,6 @@ class ConsoleMerger(EventBusReaderBase):
             return  # nothing we would merge here
 
         new_payload = dict(data)
-        new_payload["owner"] = self
         new_payload["line"] = f"{data['owner'].name} {data['line']}"
 
         self._trigger(event_name, new_payload)

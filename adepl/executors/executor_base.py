@@ -1,7 +1,8 @@
 from threading import Thread
 from typing import Dict, Optional, List
 
-from adepl.deployment.event_bus_reader_base import EventBusReaderBase
+from adepl.core import EVENT
+from adepl.core.event_bus_reader_base import EventBusReaderBase
 
 
 class ExecutorBase(EventBusReaderBase):
@@ -23,7 +24,7 @@ class ExecutorBase(EventBusReaderBase):
         self._executor_thread: Optional[Thread] = None
         self._project = project
 
-        self._set_event_handler(EventBusReaderBase.project_change, self._change_handler)
+        self._set_event_handler(EVENT.PROJECT_CHANGED, self._change_handler)
 
     @property
     def name(self):

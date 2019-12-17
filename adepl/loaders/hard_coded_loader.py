@@ -1,6 +1,6 @@
 from typing import List
 
-from adepl.deployment.solution_instance import SolutionInstance
+from adepl.core.solution_instance import SolutionInstance
 from adepl.executors.python_conda_executor import PythonCondaExecutor
 from adepl.loaders.loader_base import LoaderBase
 from adepl.code_providers.git_synced_project import GitSyncedProject

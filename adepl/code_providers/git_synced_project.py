@@ -41,17 +41,11 @@ class GitSyncedProject(ProjectBase):
         self._proxy.kill()
 
     def _stdout_handler(self, line):
-        self._trigger("stdout", {
-            "owner": self,
-            "line": line,
-        })
+        self._trigger("stdout", {"line": line})
 
         if line is not None:
             has_change = "files changed" in line or "file changed" in line
             self._change_registered = self._change_registered or has_change
 
     def _stderr_handler(self, line):
-        self._trigger("stderr", {
-            "owner": self,
-            "line": line
-        })
+        self._trigger("stderr", {"line": line})
